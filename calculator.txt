@@ -1,0 +1,129 @@
+callreadax                           // Input first number
+sub ax,0x30
+mul ax,0d10
+mov [num1],Ax
+call readax
+sub ax, 0x30
+MOV BX,[num1]
+ADD AX,BX
+mov [num1],AX
+mov ax,[num1]
+call readax                          //Input the symbol
+mov[symbol],ax
+ 
+call readax                           // INput second number
+sub ax,0x30
+mul ax,0d10
+mov [num2],Ax
+call readax
+sub ax, 0x30
+MOV BX,[num2]
+ADD AX,BX
+mov [num2],AX
+mov ax,[num2]
+ 
+call docorrectcalc                                           // use to work what sum to do.
+
+printresult:                                                             // print the Result.
+mov bx,[ans]
+div bx,0d100
+ADD BX,0x30
+call writebx
+mov bx,[ans]
+div bx,0d10
+MOD BX,0d10
+ADD BX,0x30
+call writebx
+mov bx,[ans]
+mod bx,0d10
+ADD BX,0x30
+call writebx
+ HALT
+ 
+readAX:								// this read to the ax read
+mov bx, [0xf5]
+cmp bx, 0x0
+jeq readAX
+mov AX, [0xf3]
+mov bx, 0x0
+mov [0xf5],bx
+ret
+ 
+writeAx:							// this write to ax
+mov Bx,[outstat]
+cmp Bx,0x0
+JNE writeAx
+mov [outdata],AX
+mov Ax,0x1
+mov[outstat],Ax
+RET
+ 
+readBX:							// this read from BX
+Mov AX,[outstat]
+CMP AX,0x0
+jne writebx
+MOV bx,0x1
+MOV [outdata],BX
+MOV BX,0x1
+MOV [outstat],BX
+RET
+ 
+writebx:						//this write from bx
+mov ax,[outstat]
+cmp ax,0x0
+JNE writebx
+mov [outdata],BX
+mov bx,0x1
+mov[outstat],bx
+RET
+ 
+docorrectcalc:						
+MOV AX,[symbol]
+cmp ax,'+'
+jeq addition
+cmp ax,'-'
+jeq subtraction
+cmp ax,'*'
+jeq multiple
+cmp ax,'/'
+jeq division
+
+
+ 
+addition:
+MOV AX,[num1]
+MOV BX, [num2]
+add AX,BX
+MOV [ans],AX
+jmp printresult
+ 
+subtraction:
+mov ax,[num2]
+mov bx,[num1]
+sub BX,AX
+mov [ans],bx
+jmp printresult
+ 
+multiple:
+mov ax,[num1]
+mov bx,[num2]
+mul ax,bx
+MOV [ans], AX
+jmp printresult
+ 
+division:
+MOV ax,[num1]
+MOV bx,[num1]
+div Bx,AX
+mov [ans],BX 
+jmp printresult 
+
+outstat: EQU 0xf2
+outdata: EQU 0XF0
+instat: EQU 0xf5
+indata: EQU 0xf3
+
+num1: DC.W 0x0
+num2: DC.W 0x0
+symbol: DC.w 0x0
+Ans: DC.W 0x0
